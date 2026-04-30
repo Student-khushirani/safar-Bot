@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SafarBot – Your AI-Powered Travel Assistant with real-time weather and Google Maps." />
+  <title>SafarBot ✈️ AI Travel Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈️</text></svg>" />
+</head>
+<body>
+
+  <!-- ═══ Animated Background ═══ -->
+  <div class="bg-layer">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+    <div class="bg-grid"></div>
+  </div>
+
+  <!-- ═══ Floating Travel Emojis ═══ -->
+  <div class="floating-emojis" id="floatingEmojis"></div>
+
+  <!-- ═══ Main App ═══ -->
+  <div class="app" id="app">
+
+    <!-- ─── Header ─── -->
+    <header class="header" id="appHeader">
+      <div class="header-left">
+        <div class="logo">
+          <span class="logo-icon">✈️</span>
+          <div class="logo-text">
+            <h1>SafarBot</h1>
+            <span class="tagline">AI Travel Assistant</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn-header btn-weather" id="btnWeather" title="Real-Time Weather">
+          <span>🌦️</span> Weather
+        </button>
+        <button class="btn-header btn-map" id="btnMap" title="Google Maps">
+          <span>🗺️</span> Map
+        </button>
+        <button class="btn-header btn-explore" id="btnExplore" title="Explore Destinations">
+          <span>🌍</span> Explore
+        </button>
+        <button class="btn-header btn-new" id="btnNewChat" title="New Chat">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New
+        </button>
+      </div>
+    </header>
+
+    <!-- ─── Chat Area ─── -->
+    <main class="chat-area" id="chatArea">
+
+      <!-- Welcome Screen -->
+      <div class="welcome" id="welcomeScreen">
+        <div class="welcome-glow"></div>
+        <div class="welcome-icon-wrap">
+          <span class="welcome-icon">✈️</span>
+        </div>
+        <h2 class="welcome-title">Where do you want to go?</h2>
+        <p class="welcome-subtitle">I'm SafarBot — your AI travel companion. Ask me anything about destinations, budgets, safety, packing & more.</p>
+
+        <!-- Welcome Feature Buttons -->
+        <div class="welcome-features">
+          <button class="welcome-feature-btn" id="welcomeWeatherBtn">
+            <span class="wf-icon">🌦️</span>
+            <span class="wf-label">Check Weather</span>
+          </button>
+          <button class="welcome-feature-btn" id="welcomeMapBtn">
+            <span class="wf-icon">🗺️</span>
+            <span class="wf-label">Open Google Maps</span>
+          </button>
+          <button class="welcome-feature-btn" id="welcomeExploreBtn">
+            <span class="wf-icon">🌍</span>
+            <span class="wf-label">Explore Destinations</span>
+          </button>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions" id="quickActions">
+          <button class="quick-btn" data-msg="Plan a mountain trip for me">
+            <span class="quick-icon">🏔️</span>
+            <span class="quick-label">Mountain Trip</span>
+          </button>
+          <button class="quick-btn" data-msg="Plan a beach getaway for me">
+            <span class="quick-icon">🏖️</span>
+            <span class="quick-label">Beach Getaway</span>
+          </button>
+          <button class="quick-btn" data-msg="Surprise me with a random destination!">
+            <span class="quick-icon">🎲</span>
+            <span class="quick-label">Surprise Me!</span>
+          </button>
+          <button class="quick-btn" data-msg="Plan a budget-friendly trip under ₹5000">
+            <span class="quick-icon">💰</span>
+            <span class="quick-label">Budget Trip</span>
+          </button>
+          <button class="quick-btn" data-msg="Plan a luxury trip experience for a couple">
+            <span class="quick-icon">👑</span>
+            <span class="quick-label">Luxury Trip</span>
+          </button>
+          <button class="quick-btn" data-msg="I want to explore Northeast India.">
+            <span class="quick-icon">🌿</span>
+            <span class="quick-label">Northeast India</span>
+          </button>
+        </div>
+        <div class="welcome-hint">
+          <span>💡</span> Try: <em>"Plan a 5‑day trip to Manali for a couple"</em>
+        </div>
+      </div>
+
+      <!-- Messages Container -->
+      <div class="messages" id="messages"></div>
+
+    </main>
+
+    <!-- ─── Input Area ─── -->
+    <div class="input-area" id="inputArea">
+      <form class="input-form" id="chatForm">
+        <div class="input-wrapper">
+          <input type="text" id="messageInput" class="message-input" placeholder="Ask SafarBot about any destination..." autocomplete="off" maxlength="1000" />
+          <button type="submit" class="send-btn" id="sendBtn" title="Send Message">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+      </form>
+      <p class="input-footer">SafarBot uses AI (Llama 3.1) • <strong>Weather</strong> & <strong>Google Maps</strong> included</p>
+    </div>
+
+  </div>
+
+  <!-- ═══ Weather Modal ═══ -->
+  <div class="modal-overlay" id="weatherOverlay">
+    <div class="modal-panel weather-modal">
+      <div class="modal-header">
+        <h2>🌦️ Real-Time Weather</h2>
+        <button class="modal-close" id="weatherClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="weather-search-bar">
+          <form class="weather-search-form" id="weatherForm">
+            <input type="text" class="weather-search-input" id="weatherCityInput" placeholder="Enter city name (e.g. Mumbai, Tokyo, Paris)..." />
+            <button type="submit" class="weather-search-btn">Search</button>
+          </form>
+          <button type="button" class="locate-btn" id="weatherLocateBtn" title="Use My Location">📍 My Location</button>
+        </div>
+        <div id="weatherResult">
+          <div class="weather-placeholder">
+            <div class="weather-placeholder-icon">🌍</div>
+            <div class="weather-placeholder-text">Enter a city to see live weather data</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Google Maps Modal ═══ -->
+  <div class="modal-overlay" id="mapOverlay">
+    <div class="modal-panel map-modal">
+      <div class="modal-header">
+        <h2>🗺️ Google Maps</h2>
+        <div class="modal-header-actions">
+          <button type="button" class="map-action-btn" id="mapFindMe" title="Find My Location">📍 Find Me</button>
+          <button type="button" class="map-action-btn map-open-btn" id="mapOpenGoogle" title="Open in Google Maps">↗️ Open in Google Maps</button>
+        </div>
+        <button class="modal-close" id="mapClose">&times;</button>
+      </div>
+      <div class="modal-body map-body">
+        <form class="map-search-form" id="mapSearchForm">
+          <input type="text" class="map-search-input" id="mapSearchInput" placeholder="Search any place (e.g. Taj Mahal, Goa, Tokyo)..." />
+          <button type="submit" class="map-search-btn">Search</button>
+        </form>
+        <div class="google-map-container">
+          <iframe
+            id="googleMapFrame"
+            src="https://www.google.com/maps?q=India&z=5&output=embed"
+            width="100%" height="100%" style="border:0"
+            allowfullscreen loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+        <div class="map-controls">
+          <div class="map-toggle-bar">
+            <button class="map-toggle-btn active" data-layer="streets">🗺️ Map</button>
+            <button class="map-toggle-btn" data-layer="satellite">🛰️ Satellite</button>
+            <button class="map-toggle-btn" data-layer="terrain">⛰️ Terrain</button>
+          </div>
+        </div>
+        <div class="map-directions-bar">
+          <div class="directions-title">🧭 Get Directions</div>
+          <div class="directions-inputs">
+            <input type="text" id="directionsFrom" class="directions-input" placeholder="From (e.g. Mumbai)" />
+            <span class="directions-arrow">→</span>
+            <input type="text" id="directionsTo" class="directions-input" placeholder="To (e.g. Goa)" />
+            <button type="button" class="directions-go-btn" id="getDirectionsBtn">Go</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Explore Modal ═══ -->
+  <div class="explore-overlay" id="exploreOverlay">
+    <div class="explore-modal" id="exploreModal">
+      <div class="explore-header">
+        <h2>🌍 Explore Destinations</h2>
+        <button class="explore-close" id="exploreClose">&times;</button>
+      </div>
+      <div class="explore-tabs">
+        <button class="explore-tab active" data-tab="india">🇮🇳 India</button>
+        <button class="explore-tab" data-tab="asia">🌏 Asia</button>
+      </div>
+      <div class="explore-filters" id="exploreFilters"></div>
+      <div class="explore-search">
+        <input type="text" id="exploreSearch" placeholder="Search destinations, cities, attractions..." />
+      </div>
+      <div class="explore-grid" id="exploreGrid"></div>
+    </div>
+  </div>
+
+  <!-- ═══ Destination Detail Modal ═══ -->
+  <div class="detail-overlay" id="detailOverlay">
+    <div class="detail-modal" id="detailModal">
+      <button class="detail-close" id="detailClose">&times;</button>
+      <div class="detail-content" id="detailContent"></div>
+    </div>
+  </div>
+
+  <script src="destinations.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
