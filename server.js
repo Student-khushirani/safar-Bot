@@ -44,15 +44,21 @@ RULES:
 - End with: *✨ Want me to customize further?*
 `;
 
-// ─── Groq AI Setup (Llama 3.1) ─────────────────────────────────────────────
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const AI_MODEL = 'llama-3.1-8b-instant';
+// ─── Gemini AI Setup ─────────────────────────────────────────────────────────
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+let genAI = null;
+let aiModel = null;
 
-if (GROQ_API_KEY) {
-  console.log('✅ Groq API key found – using Llama 3.1');
+if (GEMINI_API_KEY) {
+  genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  aiModel = genAI.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
+    systemInstruction: SAFARBOT_PROMPT
+  });
+  console.log('✅ Gemini API key found – using gemini-1.5-flash');
 } else {
-  console.warn('⚠️  No Groq API key found. Chat will return an error message.');
+  console.warn('⚠️  No Gemini API key found. Chat will return an error message.');
 }
 
 // ─── Conversation Storage (in-memory) ───────────────────────────────────────
@@ -67,9 +73,9 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Missing message or sessionId' });
     }
 
-    if (!GROQ_API_KEY) {
+    if (!GEMINI_API_KEY || !aiModel) {
       return res.json({
-        reply: `## ⚠️ API Key Required\n\nSafarBot needs a **Groq API key** to work.\n\n**How to set it up:**\n1. Go to [Groq Console](https://console.groq.com)\n2. Create a free API key\n3. Add it to your \`.env\` file as GROQ_API_KEY=your_key\n4. Restart the server\n\n*It's completely free! 🎉*`,
+        reply: `## ⚠️ API Key Required\n\nSafarBot needs a **Gemini API key** to work.\n\n**How to set it up:**\n1. Go to [Google AI Studio](https://aistudio.google.com/)\n2. Create an API key\n3. Add it to your Vercel Environment Variables as GEMINI_API_KEY\n4. Redeploy or restart the server\n\n*It's completely free! 🎉*`,
       });
     }
 
@@ -79,36 +85,18 @@ app.post('/api/chat', async (req, res) => {
     }
     const history = conversations.get(sessionId);
 
-    // Build messages array
-    const messages = [
-      { role: 'system', content: SAFARBOT_PROMPT },
-      ...history,
-      { role: 'user', content: message },
-    ];
+    // Build history for Gemini
+    const geminiHistory = history.map(msg => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }]
+    }));
 
-    // Call Groq API
-    const response = await fetch(GROQ_API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: AI_MODEL,
-        messages: messages,
-        temperature: 0.7,
-        max_tokens: 4096,
-      }),
+    const chat = aiModel.startChat({
+      history: geminiHistory,
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('Groq API error:', data);
-      throw new Error(data.error?.message || `API error ${response.status}`);
-    }
-
-    const reply = data.choices[0].message.content;
+    const result = await chat.sendMessage(message);
+    const reply = result.response.text();
 
     // Save to history
     history.push({ role: 'user', content: message });
@@ -123,20 +111,20 @@ app.post('/api/chat', async (req, res) => {
   } catch (error) {
     console.error('Chat error:', error.message);
 
-    if (error.message?.includes('invalid_api_key') || error.message?.includes('401')) {
+    if (error.message?.includes('API key not valid') || error.message?.includes('401')) {
       return res.json({
-        reply: `## ❌ Invalid API Key\n\nThe Groq API key in your \`.env\` file is invalid.\n\nPlease check your key at [Groq Console](https://console.groq.com) and update it.`,
+        reply: `## ❌ Invalid API Key\n\nThe Gemini API key in your environment variables is invalid.\n\nPlease check your key and update it.`,
       });
     }
 
-    if (error.message?.includes('rate_limit') || error.message?.includes('429')) {
+    if (error.message?.includes('quota') || error.message?.includes('429')) {
       return res.json({
-        reply: `## ⏳ Rate Limited\n\nToo many requests. Please wait a moment and try again.\n\n*The free Groq API has usage limits.*`,
+        reply: `## ⏳ Rate Limited\n\nToo many requests. Please wait a moment and try again.\n\n*The free Gemini API has usage limits.*`,
       });
     }
 
     res.status(500).json({
-      error: 'Something went wrong. Please try again.',
+      error: 'Something went wrong while connecting to Gemini AI. Please try again.',
     });
   }
 });
@@ -191,8 +179,8 @@ app.post('/api/clear', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
-    aiReady: !!GROQ_API_KEY,
-    model: AI_MODEL,
+    aiReady: !!GEMINI_API_KEY,
+    model: 'gemini-1.5-flash',
     uptime: process.uptime(),
   });
 });
@@ -201,7 +189,7 @@ app.get('/api/health', (req, res) => {
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
     console.log(`\n🚀 SafarBot is running at http://localhost:${PORT}`);
-    console.log(`   AI Status: ${GROQ_API_KEY ? '✅ Ready (Llama 3.1)' : '❌ No API Key'}\n`);
+    console.log(`   AI Status: ${GEMINI_API_KEY ? '✅ Ready (gemini-1.5-flash)' : '❌ No API Key'}\n`);
   });
 }
 
