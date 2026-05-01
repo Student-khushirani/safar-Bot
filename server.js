@@ -53,10 +53,10 @@ let aiModel = null;
 if (GEMINI_API_KEY) {
   genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
   aiModel = genAI.getGenerativeModel({ 
-    model: "gemini-1.5-flash",
+    model: "gemini-2.5-flash",
     systemInstruction: SAFARBOT_PROMPT
   });
-  console.log('✅ Gemini API key found – using gemini-1.5-flash');
+  console.log('✅ Gemini API key found – using gemini-2.5-flash');
 } else {
   console.warn('⚠️  No Gemini API key found. Chat will return an error message.');
 }
@@ -180,7 +180,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     aiReady: !!GEMINI_API_KEY,
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.5-flash',
     uptime: process.uptime(),
   });
 });
@@ -189,7 +189,7 @@ app.get('/api/health', (req, res) => {
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
     console.log(`\n🚀 SafarBot is running at http://localhost:${PORT}`);
-    console.log(`   AI Status: ${GEMINI_API_KEY ? '✅ Ready (gemini-1.5-flash)' : '❌ No API Key'}\n`);
+    console.log(`   AI Status: ${GEMINI_API_KEY ? '✅ Ready (gemini-2.5-flash)' : '❌ No API Key'}\n`);
   });
 }
 
