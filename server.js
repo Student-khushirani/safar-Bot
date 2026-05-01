@@ -198,7 +198,11 @@ app.get('/api/health', (req, res) => {
 });
 
 // ─── Start Server ────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`\n🚀 SafarBot is running at http://localhost:${PORT}`);
-  console.log(`   AI Status: ${GROQ_API_KEY ? '✅ Ready (Llama 3.1)' : '❌ No API Key'}\n`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`\n🚀 SafarBot is running at http://localhost:${PORT}`);
+    console.log(`   AI Status: ${GROQ_API_KEY ? '✅ Ready (Llama 3.1)' : '❌ No API Key'}\n`);
+  });
+}
+
+module.exports = app;
